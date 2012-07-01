@@ -71,7 +71,8 @@ class Filter
                 );
             }
         }
-        $transaction->execute();
+        $result = $transaction->execute();
+        return (bool) array_shift($result);
     }
 
     /**
