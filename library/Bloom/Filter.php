@@ -59,20 +59,35 @@ class Filter
      */
     public function add($element)
     {
-        $element     = (array)$element;
-        $transaction = $this
-            ->getRediska()
-            ->transaction();
-        foreach ($element as $el) {
-            foreach ($this->getHash($el) as $offset) {
-                $transaction->setBit(
-                    $this->_options['key_prefix'] . self::KEY_BIT_VECTOR,
-                    $offset, 1
-                );
+        try{
+            $element     = (array)$element;
+            $elements = array();
+            foreach ($element as $el) {
+                if(!$this->contains($el)){
+                    array_unshift($elements, $el);
+                }
             }
+            $transaction = $this
+                ->getRediska()
+                ->transaction();
+            if(!$elements){
+                return false;
+            }
+            foreach ($elements as $el) {
+                $transaction->increment($this->_options['key_prefix'] . self::KEY_BIT_COUNT);
+                foreach ($this->getHash($el) as $offset) {
+                    $transaction->setBit(
+                        $this->_options['key_prefix'] . self::KEY_BIT_VECTOR,
+                        $offset, 1
+                    );
+                }
+            }
+            $result = $transaction->execute();
+            return (bool) array_shift($result);
+        } catch(\Rediska_Transaction_Exception $e) {
+            echo $e->getMessage(), PHP_EOL;
+            return false;
         }
-        $result = $transaction->execute();
-        return (bool) array_shift($result);
     }
 
     /**
@@ -134,13 +149,22 @@ class Filter
      * @param bool $numberOfElements
      * @return number
      */
-    public function getFalsePositiveProbability($numberOfElements = false)
+    public function getFalsePositiveProbability()
     {
         // (1 - e^(-k * n / m)) ^ k
         return pow(
-            (1 - exp(-$this->k * $this->getNumberOfElements() / PHP_INT_MAX)),
+            (1 - exp(-$this->k * $this->getCount() / PHP_INT_MAX)),
             $this->k
         );
+    }
+
+    /**
+     * @return int
+     */
+    public function getCount()
+    {
+        return (int) $this->getRediska()
+            ->get($this->_options['key_prefix'] . self::KEY_BIT_COUNT);
     }
 
     /**

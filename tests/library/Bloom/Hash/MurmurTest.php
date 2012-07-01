@@ -7,7 +7,9 @@
  */
 namespace BloomTests\Hash;
 require_once
-    dirname(dirname(dirname(dirname(__DIR__)))) . '/library/Bloom/Hash/HashMix.php';
+    dirname(dirname(dirname(dirname(__DIR__)))) . '/library/Bloom/Hash/HashInterface.php';
+require_once
+    dirname(dirname(dirname(dirname(__DIR__)))) . '/library/Bloom/Hash/Murmur.php';
 /**
  * @package
  * @category
@@ -19,7 +21,7 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \Bloom\Hash\HashMix
      */
-    protected $hashmix;
+    protected $object;
 
     protected $_cycles = 10000;
 
@@ -29,7 +31,7 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->hashmix = new \Bloom\Hash\HashMix;
+        $this->object = new \Bloom\Hash\Murmur;
     }
 
     /**
@@ -41,7 +43,7 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
         $str = 'Robert Allen';
         $start = microtime(true);
         for($i = 0; $i < $this->_cycles; $i++){
-            $value = $this->hashmix->hash($str, $i);
+            $value = $this->object->hash($str, $i);
             if($value < 1){
                 echo $i, '::', $value, PHP_EOL;
             }

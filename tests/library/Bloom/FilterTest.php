@@ -7,9 +7,10 @@
  */
 namespace BloomTests;
 require_once
-    dirname(dirname(dirname(__DIR__))) . '/library/Bloom/Hash/HashInterface.php';
+    dirname(dirname(dirname(__DIR__))) .
+    '/library/Bloom/Hash/HashInterface.php';
 require_once
-    dirname(dirname(dirname(__DIR__))) . '/library/Bloom/Hash/HashMix.php';
+    dirname(dirname(dirname(__DIR__))) . '/library/Bloom/Hash/Murmur.php';
 require_once
     dirname(dirname(dirname(__DIR__))) . '/library/Bloom/Filter.php';
 require_once 'Rediska.php';
@@ -35,13 +36,15 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new \Bloom\Filter();
-        $this->object->setHash(new \Bloom\Hash\HashMix());
+        $this->object->setHash(new \Bloom\Hash\Murmur());
         $this->object->setRediska(new \Rediska());
     }
 
     public function tearDown()
     {
-        $this->object->getRediska()->flushDb(true);
+        $this->object
+            ->getRediska()
+            ->flushDb(true);
         $this->object = null;
     }
 
@@ -50,20 +53,52 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
      */
     public function testAdd()
     {
-        $this->object->add('Robert Allen');
+        $this->assertFalse($this->object->contains('aaa'));
+        $this->object->add('aaa');
+        $this->assertTrue($this->object->contains('aaa'));
     }
+
     public function testContains()
     {
-        $this->object->add('bob');
-        $this->assertTrue($this->object->contains('bob'));
-        $this->assertFalse($this->object->contains('bill'));
+        $this->object->add('aaa');
+        $this->assertTrue($this->object->contains('aaa'));
+        $this->assertFalse($this->object->contains('bbb'));
     }
+
     public function testAddMulti()
     {
         $data = array(
-            'bob','maggie','morgan','seth'
+            'aaa', 'bbb', 'ccc', 'ddd'
         );
         $this->object->add($data);
         $this->assertTrue($this->object->contains($data));
+    }
+
+    public function testKeyCount()
+    {
+        $data = array(
+            'aaa', 'bbb', 'ccc', 'ddd'
+        );
+        $this->object->add($data);
+        $this->assertEquals(4, $this->object->getCount());
+        $this->object->add('eee');
+        $this->assertEquals(5, $this->object->getCount());
+        $this->object->add($data);
+        $this->assertEquals(5, $this->object->getCount());
+        $this->object->add('eee');
+        $this->assertEquals(5, $this->object->getCount());
+
+    }
+
+    public function testGetProbability()
+    {
+        $data = array(
+            'aaa', 'bbb', 'ccc', 'ddd'
+        );
+        $this->object->add($data);
+        $this->assertTrue($this->object->getFalsePositiveProbability() > 0);
+        $this->assertTrue(
+            $this->object->getFalsePositiveProbability() < 0.0000001
+        );
     }
 }
