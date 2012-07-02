@@ -31,15 +31,12 @@ class Filter
      */
     protected $_hash;
     /**
-     * @var int
-     */
-    protected $k = 3;
-    /**
      * @var array
      */
     protected $_options = array(
-        'k'          => 4,
-        'key_prefix' => 'bf'
+        'buckets'    => 4,
+        'keyprefix' => 'bf',
+        'hashclass' => '\Bloom\Hash\HashMix'
     );
     /**
      * @var Rediska
@@ -51,35 +48,87 @@ class Filter
      */
     public function __construct($options = array())
     {
-
+        $this->setOptions($options);
     }
 
+    public function setOptions($options)
+    {
+        $reflect = new \ReflectionClass($this);
+        foreach ($options as $option => $value) {
+            $method = 'set' . ucfirst($option);
+            if($reflect->hasMethod($method)){
+                $reflect->getMethod($method)->invokeArgs($this, $value);
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->_options;
+    }
+
+    /**
+     * @param integer $buckets
+     * @return Filter
+     */
+    public function setBuckets($buckets)
+    {
+        $this->_options['buckets'] = $buckets;
+        return $this;
+    }
+
+    /**
+     * @param string $prefix
+     * @return Filter
+     */
+    public function setKeyprefix($prefix)
+    {
+        $this->_options['keyprefix'] = $prefix;
+        return $this;
+    }
+
+    /**
+     * @param string $class
+     * @return Filter
+     */
+    public function setHashclass($class)
+    {
+        $this->_options['hashclass'] = $class;
+        return $this;
+    }
     /**
      * @param $element
      */
     public function add($element)
     {
         try{
-            $element     = (array)$element;
-            $elements = array();
-            foreach ($element as $el) {
-                if(!$this->contains($el)){
-                    array_unshift($elements, $el);
-                }
-            }
+            $elements     = (array)$element;
+//            $elements = array();
+//            foreach ($element as $el) {
+//                if(!$this->contains($el)){
+//                    array_unshift($elements, $el);
+//                }
+//            }
             $transaction = $this
                 ->getRediska()
                 ->pipeline();
             if(!$elements){
                 return false;
             }
+            $i = 0;
             foreach ($elements as $el) {
-                $transaction->increment($this->_options['key_prefix'] . self::KEY_BIT_COUNT);
+//                $transaction->increment($this->_options['keyprefix'] . self::KEY_BIT_COUNT);
                 foreach ($this->getHash($el) as $offset) {
                     $transaction->setBit(
-                        $this->_options['key_prefix'] . self::KEY_BIT_VECTOR,
+                        $this->_options['keyprefix'] . self::KEY_BIT_VECTOR,
                         $offset, 1
                     );
+                    if(++$i % 1000){
+                        $transaction->execute();
+                    }
                 }
             }
             $result = $transaction->execute();
@@ -103,7 +152,7 @@ class Filter
         foreach ($element as $el) {
             foreach ($this->getHash($el) as $offset) {
                 $transaction->getBit(
-                    $this->_options['key_prefix'] . self::KEY_BIT_VECTOR,
+                    $this->_options['keyprefix'] . self::KEY_BIT_VECTOR,
                     $offset
                 );
             }
@@ -119,7 +168,7 @@ class Filter
     {
         return (int)$this
             ->getRediska()
-            ->get($this->_options['key_prefix'] . self::KEY_BIT_COUNT);
+            ->get($this->_options['keyprefix'] . self::KEY_BIT_COUNT);
     }
 
     /**
@@ -128,8 +177,21 @@ class Filter
      */
     public function getHash($element)
     {
+        if(!$this->_hash){
+            if($this->_options['hashclass'] instanceof \Bloom\Hash\HashInterface){
+                $this->_hash = $this->_options['hashclass'];
+            } else {
+                $reflect = new \ReflectionClass($this->_options['hashclass']);
+                if(!$reflect->implementsInterface('\Bloom\Hash\HashInterface')){
+                    throw new \RuntimeException(
+                        'hashclass must implement interface [\Bloom\Hash\HashInterface]'
+                    );
+                }
+                $this->_hash = $reflect->newInstance();
+            }
+        }
         $hash = array();
-        for ($i = 0; $i < $this->k; $i++) {
+        for ($i = 0; $i < $this->_options['buckets']; $i++) {
             array_unshift($hash, $this->_hash->hash($element, $i));
         }
         return (array)$hash;
@@ -153,8 +215,8 @@ class Filter
     {
         // (1 - e^(-k * n / m)) ^ k
         return pow(
-            (1 - exp(-$this->k * $this->getCount() / PHP_INT_MAX)),
-            $this->k
+            (1 - exp(-$this->_options['buckets'] * $this->getCount() / PHP_INT_MAX)),
+            $this->_options['buckets']
         );
     }
 
@@ -164,7 +226,7 @@ class Filter
     public function getCount()
     {
         return (int) $this->getRediska()
-            ->get($this->_options['key_prefix'] . self::KEY_BIT_COUNT);
+            ->get($this->_options['keyprefix'] . self::KEY_BIT_COUNT);
     }
 
     /**
@@ -172,6 +234,9 @@ class Filter
      */
     public function getRediska()
     {
+        if(!$this->rediska instanceof \Rediska){
+            $this->rediska = new \Rediska();
+        }
         return $this->rediska;
     }
 
