@@ -13,6 +13,12 @@ testing and research. This potentially results in a 3% false positive rate for
 10b values given sufficient number of hashing buckets. (I am performing more on
 these numbers before I get overly confident on these findings.)
 
+Read Times on Benchmarks: 0.0011499519820647/s with three key hashing using a
+word list of 27607 unique strings.
+
+Add Times on benchmark tests: 0.0036964981654479/s with three key hashing using
+a word list of 27607 unique strings.
+
 
 ```php
 <?php

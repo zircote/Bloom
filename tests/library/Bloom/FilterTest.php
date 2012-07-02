@@ -48,6 +48,25 @@ class HashMixTest extends \PHPUnit_Framework_TestCase
         $this->object = null;
     }
 
+    public function testBenchMark()
+    {
+        $elements = file(dirname(dirname(__DIR__)) . '/NAMES.txt');
+        echo 'Wordlist size:', count($elements), PHP_EOL;
+        $start = microtime(true);
+        $this->object->add($elements);
+        echo 'save time:', microtime(true) - $start, PHP_EOL;
+        $start = microtime(true);
+        foreach ($elements as $el) {
+            $this->assertTrue($this->object->contains($el));
+        }
+        foreach (array('zzzzzz','zzzzzzzzz','aaaaaaa','aaaagvdsgfdsfg') as $el) {
+            $this->assertFalse($this->object->contains($el));
+        }
+        echo PHP_EOL, 'endtime:', microtime(true) - $start, PHP_EOL;
+//        echo 'Total keys added:', $this->object->getNumberOfElements(),  PHP_EOL;
+        $this->assertTrue($this->object->contains($elements));
+
+    }
     /**
      * 2.6631093025208E-5/operation
      */

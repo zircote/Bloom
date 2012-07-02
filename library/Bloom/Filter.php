@@ -33,7 +33,7 @@ class Filter
     /**
      * @var int
      */
-    protected $k = 4;
+    protected $k = 3;
     /**
      * @var array
      */
@@ -69,7 +69,7 @@ class Filter
             }
             $transaction = $this
                 ->getRediska()
-                ->transaction();
+                ->pipeline();
             if(!$elements){
                 return false;
             }
@@ -99,7 +99,7 @@ class Filter
         $element     = (array)$element;
         $transaction = $this
             ->getRediska()
-            ->transaction();
+            ->pipeline();
         foreach ($element as $el) {
             foreach ($this->getHash($el) as $offset) {
                 $transaction->getBit(
