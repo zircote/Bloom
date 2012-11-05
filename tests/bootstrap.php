@@ -1,6 +1,4 @@
 <?php
-namespace Bloom\Hash;
-
 /**
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * Copyright [2012] [Robert Allen]
@@ -18,21 +16,7 @@ namespace Bloom\Hash;
  * limitations under the License.
  *
  * @package     Bloom
- * @category    Hash
+ * @category    Tests
  */
-/**
- * @package     Bloom
- * @category    Bloom
- */
-interface HashInterface
-{
-    /**
-     * @abstract
-     *
-     * @param     $hash_key
-     * @param int $bucket
-     *
-     * @return int
-     */
-    public function hash($hash_key, $bucket = 0);
-}
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+

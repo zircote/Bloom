@@ -1,17 +1,30 @@
 <?php
-/**
- * @package
- * @category
- * @subcategory
- * Date: 6/30/12T7:46 PM
- */
 namespace Bloom;
+
+/**
+ * @license http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright [2012] [Robert Allen]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @package     Bloom
+ * @category    Bloom
+ */
 use Rediska;
 
 /**
- * @package
- * @category
- * @subcategory
+ * @package     Bloom
+ * @category    Bloom
  *
  * echo (1000000/PHP_INT_MAX) * log(2);
  * >>> 0.00032277180854358
@@ -57,7 +70,7 @@ class Filter
         foreach ($options as $option => $value) {
             $method = 'set' . ucfirst($option);
             if($reflect->hasMethod($method)){
-                $reflect->getMethod($method)->invokeArgs($this, $value);
+                $reflect->getMethod($method)->invokeArgs($this, array($value));
             }
         }
     }

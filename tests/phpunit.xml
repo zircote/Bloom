@@ -1,0 +1,30 @@
+<phpunit bootstrap="./bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="false"
+         convertWarningsToExceptions="true"
+         stopOnFailure="false"
+         syntaxCheck="true">
+    <testsuite name="Bloom Filter Library Test Suite">
+        <directory>library/Bloom</directory>
+    </testsuite>
+    <logging>
+        <!--<log type="coverage-text" target="php://stdout"-->
+             <!--showUncoveredFiles="true"/>-->
+        <!--<log type="coverage-html" target="/tmp/report" charset="UTF-8"-->
+             <!--yui="true" highlight="false"-->
+             <!--lowUpperBound="35" highLowerBound="70"/>-->
+        <!--<log type="testdox-html" target="/tmp/testdox.html"/>-->
+    </logging>
+    <filter>
+        <blacklist>
+            <directory suffix=".php">../</directory>
+        </blacklist>
+        <whitelist>
+            <directory suffix=".php">../library/Bloom</directory>
+            <exclude>
+                <file>./bootstrap.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

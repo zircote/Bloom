@@ -1,6 +1,8 @@
 Bloom
 =====
 
+[![Build Status](https://secure.travis-ci.org/zircote/Bloom.png)](http://travis-ci.org/zircote/Bloom)
+
 This project has morphed from an attempt of 'pure' php bloom filters to a tool
 that employs `Redis` and `Rediska` as a storage and interface for a distributed
 `Bloom Filter`.

@@ -1,0 +1,26 @@
+{
+    "name": "zircote/bloom",
+    "description": "A PHP/Redis Bloom filter experiment",
+    "type": "library",
+    "homepage": "https://github.com/zircote/Bloom",
+    "license" : "Apache2",
+    "keywords": ["Bloom Filter","bit-op", "cache", "HashMix", "Murmur Hash"],
+    "support": {
+        "issues": "https://github.com/zircote/Bloom/issues"
+    },
+    "authors": [
+        {
+            "name": "Robert Allen",
+            "email": "zircote@gmail.com"
+        }
+    ],
+    "autoload":{
+        "psr-0":{
+            "Bloom":"library",
+            "BloomTests":"tests/library"
+        }
+    },
+    "require": {
+        "rediska/rediska": "master-dev"
+    }
+}
