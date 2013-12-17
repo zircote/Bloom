@@ -62,3 +62,7 @@ var_dump($filter->contains(array('NO','or add','an array of elements')));
 // bool(false)
 
 ```
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/zircote/bloom/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
